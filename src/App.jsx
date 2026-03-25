@@ -8,8 +8,8 @@ import './App.css';
 
 import TimeSlotCalendar from './components/TimeSlotCalendar';
 
-const API_BASE_URL = 'http://localhost:8081/api';
-const RESERVATION_API_URL = '/api/reservations';
+const API_BASE_URL = 'https://yoyaku-server.onrender.com/api';
+const RESERVATION_API_URL = 'https://yoyaku-server.onrender.com/api/reservations';
 
 function staffKeyFromSelection(selectedStaff) {
   if (!selectedStaff) return 'none';
