@@ -185,34 +185,6 @@ const Reservation = () => {
         }
     };
 
-    // LINEへ予約完了メッセージを自動送信
-    const sendLineMessage = async (data) => {
-        const staffName = data.staff.id.startsWith('any') || data.staff.id === 'none' ? data.staff.name : data.staff.name;
-        const couponLabel = data.coupon.id === 'none' ? 'なし' : data.coupon.label;
-
-        const message = `【予約リクエスト完了】
-担当：${staffName}
-日時：${formatDate(data.date)} ${data.time}
-メニュー：${data.menu.name}
-クーポン：${couponLabel}
-
-ご予約リクエストを承りました！店主からの確認をお待ちください。`;
-
-        if (isLiffReady && liff.isLoggedIn()) {
-            try {
-                await liff.sendMessages([
-                    {
-                        type: 'text',
-                        text: message
-                    }
-                ]);
-            } catch (e) {
-                console.error('LIFF Message Error: ', e);
-                throw e;
-            }
-        }
-    };
-
     const resetReservation = () => {
         setStep(1);
         setReservationData({ menu: null, staff: null, date: '', time: '', coupon: coupons[0], userName: '', userPhone: '' });
@@ -222,15 +194,7 @@ const Reservation = () => {
     const handleConfirm = async () => {
         try {
             await sendApiRequest(reservationData);
-
-            try {
-                // API送信成功後、お客様のトークルームへ内容を送信
-                await sendLineMessage(reservationData);
-            } catch (messageErr) {
-                console.warn('APIは成功しましたが、LINEメッセージ送信に失敗しました', messageErr);
-            }
-
-            alert('予約完了：\nご予約内容をLINEメッセージで送信いたしました！');
+            alert('予約が完了しました');
             resetReservation();
         } catch (error) {
             console.log('Reservation failed.', error);
