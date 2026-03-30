@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
+import Reservation from './components/Reservation';
 import Shop from './components/Shop';
 import './App.css';
 
@@ -7,7 +8,7 @@ function App() {
   return (
     <BrowserRouter>
       <Routes>
-        <Route path="/" element={<Shop />} />
+        <Route path="/" element={<Reservation />} />
         <Route path="/shop" element={<Shop />} />
         {/* その他の無効なURLにアクセスした場合のフォールバック */}
         <Route path="*" element={
