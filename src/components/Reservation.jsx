@@ -31,9 +31,22 @@ const Reservation = () => {
     useEffect(() => {
         const initLiff = async () => {
             try {
-                await liff.init({ liffId: '2009587376-RxyE3qYl' });
+                await liff.init({ liffId: '2009587376-SnE3T7WY' });
+                console.log('LIFF init success');
                 setIsLiffReady(true);
-                console.log('LIFF initialized successfully.');
+
+                // 初期化成功後、ログイン済みならプロフィールを取得して名前を自動入力
+                if (liff.isLoggedIn()) {
+                    try {
+                        const profile = await liff.getProfile();
+                        setReservationData(prev => ({
+                            ...prev,
+                            userName: prev.userName || profile.displayName
+                        }));
+                    } catch (profileErr) {
+                        console.error('LINEプロフィールの取得に失敗しました', profileErr);
+                    }
+                }
             } catch (err) {
                 console.error('LIFF initialization failed', err);
             }
