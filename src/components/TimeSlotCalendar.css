@@ -1,0 +1,127 @@
+.calendar-container {
+    width: 100%;
+}
+
+.date-picker-section {
+    margin-bottom: 2rem;
+    text-align: center;
+}
+
+.date-label {
+    display: block;
+    margin-bottom: 0.8rem;
+    color: #554e4a;
+    font-size: 0.95rem;
+    font-weight: 500;
+}
+
+.date-nav-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.date-nav-btn {
+    background: #fff;
+    border: 1px solid #d3cdc1;
+    color: #8a7c73;
+    width: 44px;
+    height: 44px;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all 0.2s;
+}
+
+.date-nav-btn:hover {
+    background: #f4efeb;
+}
+
+.date-input {
+    width: 100%;
+    max-width: 220px;
+    padding: 0.8rem;
+    border-radius: 8px;
+    border: 1px solid #d3cdc1;
+    font-size: 1.1rem;
+    background: #faf9f7;
+    color: #444;
+    outline: none;
+    font-family: inherit;
+    text-align: center;
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.02);
+    transition: all 0.2s;
+}
+
+.date-input:focus {
+    border-color: #c5a059;
+    /* Gold accent */
+    background: #fff;
+    box-shadow: 0 0 0 2px rgba(197, 160, 89, 0.2);
+}
+
+.calendar-date-title {
+    text-align: center;
+    color: #554e4a;
+    margin-bottom: 1rem;
+    font-size: 1.15rem;
+    font-weight: 500;
+}
+
+.calendar-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    /* 4 columns for 30min items */
+    gap: 0.6rem;
+}
+
+.calendar-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 0.8rem 0.2rem;
+    border-radius: 10px;
+    border: 1px solid #ece8e1;
+    background: #fff;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.calendar-slot.available:hover {
+    background: #faf9f7;
+    border-color: #c5a059;
+    /* Gold hover */
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.05);
+}
+
+.calendar-slot.unavailable {
+    background: #f9f9f9;
+    border-color: #f0f0f0;
+    cursor: not-allowed;
+    opacity: 0.5;
+}
+
+.slot-time {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: #444;
+    margin-bottom: 0.3rem;
+}
+
+.status-circle {
+    color: #4caf50;
+    font-size: 1.4rem;
+    line-height: 1;
+}
+
+.status-cross {
+    color: #f44336;
+    font-size: 1.4rem;
+    line-height: 1;
+}
