@@ -140,36 +140,65 @@ const Reservation = () => {
         return `${d.getMonth() + 1}/${d.getDate()}`;
     };
 
-    // LINEへ予約完了メッセージを自動送信
-    const sendLineMessage = async (data) => {
-        const formattedDate = formatDate(data.date);
+    // APIへ予約データをPOST送信
+    const sendApiRequest = async (data) => {
         const staffName = data.staff.id.startsWith('any') || data.staff.id === 'none' ? data.staff.name : data.staff.name;
         const couponLabel = data.coupon.id === 'none' ? 'なし' : data.coupon.label;
 
-        const message = `【予約完了】
+        const payload = {
+            userName: data.userName,
+            userPhone: data.userPhone,
+            reservationDate: data.date,
+            reservationTime: data.time,
+            assistantName: staffName,
+            menuName: data.menu.name,
+            couponName: couponLabel
+        };
+
+        try {
+            const response = await fetch('https://yoyaku-server.onrender.com/api/reservations', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            });
+
+            if (!response.ok) {
+                throw new Error(`送信エラー: ${response.status}`);
+            }
+        } catch (e) {
+            console.error('API Post Error: ', e);
+            alert('予約エラー: 通信に失敗しました。時間をおいて再度お試しください。');
+            throw e;
+        }
+    };
+
+    // LINEへ予約完了メッセージを自動送信
+    const sendLineMessage = async (data) => {
+        const staffName = data.staff.id.startsWith('any') || data.staff.id === 'none' ? data.staff.name : data.staff.name;
+        const couponLabel = data.coupon.id === 'none' ? 'なし' : data.coupon.label;
+
+        const message = `【予約リクエスト完了】
 担当：${staffName}
-日時：${formattedDate} ${data.time}
+日時：${formatDate(data.date)} ${data.time}
 メニュー：${data.menu.name}
 クーポン：${couponLabel}
 
-ご来店をお待ちしております！`;
+ご予約リクエストを承りました！店主からの確認をお待ちください。`;
 
-        if (!isLiffReady || !liff.isLoggedIn()) {
-            alert('LINE連携エラー: ログインしていないため送信できません。');
-            throw new Error('LIFF is not logged in');
-        }
-
-        try {
-            await liff.sendMessages([
-                {
-                    type: 'text',
-                    text: message
-                }
-            ]);
-        } catch (e) {
-            console.error('LIFF Message Error: ', e);
-            alert(`LINEメッセージ送信に失敗しました: ${e.message}\n(※外部ブラウザで開いている場合などは送信できません)`);
-            throw e;
+        if (isLiffReady && liff.isLoggedIn()) {
+            try {
+                await liff.sendMessages([
+                    {
+                        type: 'text',
+                        text: message
+                    }
+                ]);
+            } catch (e) {
+                console.error('LIFF Message Error: ', e);
+                throw e;
+            }
         }
     };
 
@@ -181,12 +210,19 @@ const Reservation = () => {
 
     const handleConfirm = async () => {
         try {
-            await sendLineMessage(reservationData);
-            alert('予約が完了しました');
+            await sendApiRequest(reservationData);
+
+            try {
+                // API送信成功後、お客様のトークルームへ内容を送信
+                await sendLineMessage(reservationData);
+            } catch (messageErr) {
+                console.warn('APIは成功しましたが、LINEメッセージ送信に失敗しました', messageErr);
+            }
+
+            alert('予約完了：\nご予約内容をLINEメッセージで送信いたしました！');
             resetReservation();
         } catch (error) {
-            console.log('Reservation could not be completed cleanly due to LIFF error.', error);
-            // エラー時はトップに戻さない（送信していないため）
+            console.log('Reservation failed.', error);
         }
     };
 
