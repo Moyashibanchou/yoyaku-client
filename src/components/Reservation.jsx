@@ -35,17 +35,21 @@ const Reservation = () => {
                 console.log('LIFF init success');
                 setIsLiffReady(true);
 
+                // 自動ログインの実装：ログインしていなければ直ちにログイン（認可）画面へ
+                if (!liff.isLoggedIn()) {
+                    liff.login();
+                    return;
+                }
+
                 // 初期化成功後、ログイン済みならプロフィールを取得して名前を自動入力
-                if (liff.isLoggedIn()) {
-                    try {
-                        const profile = await liff.getProfile();
-                        setReservationData(prev => ({
-                            ...prev,
-                            userName: prev.userName || profile.displayName
-                        }));
-                    } catch (profileErr) {
-                        console.error('LINEプロフィールの取得に失敗しました', profileErr);
-                    }
+                try {
+                    const profile = await liff.getProfile();
+                    setReservationData(prev => ({
+                        ...prev,
+                        userName: prev.userName || profile.displayName
+                    }));
+                } catch (profileErr) {
+                    console.error('LINEプロフィールの取得に失敗しました', profileErr);
                 }
             } catch (err) {
                 console.error('LIFF initialization failed', err);
@@ -150,20 +154,22 @@ const Reservation = () => {
 
 ご来店をお待ちしております！`;
 
+        if (!isLiffReady || !liff.isLoggedIn()) {
+            alert('LINE連携エラー: ログインしていないため送信できません。');
+            throw new Error('LIFF is not logged in');
+        }
+
         try {
-            if (isLiffReady && liff.isLoggedIn()) {
-                await liff.sendMessages([
-                    {
-                        type: 'text',
-                        text: message
-                    }
-                ]);
-            } else {
-                console.log("LIFF is not logged in / ready. Simulated message:\n", message);
-            }
+            await liff.sendMessages([
+                {
+                    type: 'text',
+                    text: message
+                }
+            ]);
         } catch (e) {
             console.error('LIFF Message Error: ', e);
-            console.log("Fallback Simulated LINE message:\n", message);
+            alert(`LINEメッセージ送信に失敗しました: ${e.message}\n(※外部ブラウザで開いている場合などは送信できません)`);
+            throw e;
         }
     };
 
@@ -174,9 +180,14 @@ const Reservation = () => {
     };
 
     const handleConfirm = async () => {
-        await sendLineMessage(reservationData);
-        alert('予約が完了しました');
-        resetReservation();
+        try {
+            await sendLineMessage(reservationData);
+            alert('予約が完了しました');
+            resetReservation();
+        } catch (error) {
+            console.log('Reservation could not be completed cleanly due to LIFF error.', error);
+            // エラー時はトップに戻さない（送信していないため）
+        }
     };
 
     return (
