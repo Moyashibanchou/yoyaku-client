@@ -142,10 +142,21 @@ const Reservation = () => {
 
     // APIへ予約データをPOST送信
     const sendApiRequest = async (data) => {
+        let userId = 'unknown';
+        if (isLiffReady && liff.isLoggedIn()) {
+            try {
+                const profile = await liff.getProfile();
+                userId = profile.userId;
+            } catch (err) {
+                console.warn('userId取得エラー: ', err);
+            }
+        }
+
         const staffName = data.staff.id.startsWith('any') || data.staff.id === 'none' ? data.staff.name : data.staff.name;
         const couponLabel = data.coupon.id === 'none' ? 'なし' : data.coupon.label;
 
         const payload = {
+            userId: userId,
             userName: data.userName,
             userPhone: data.userPhone,
             reservationDate: data.date,
