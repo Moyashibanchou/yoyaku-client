@@ -1,8 +1,9 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import './Reservation.css';
 import { useNavigate } from 'react-router-dom';
 import TimeSlotCalendar from './TimeSlotCalendar';
 import { Scissors, User, Calendar, Tag, ChevronLeft } from 'lucide-react';
+import liff from '@line/liff';
 
 const Reservation = () => {
     // クーポンデータ
@@ -24,6 +25,21 @@ const Reservation = () => {
     });
     const [filter, setFilter] = useState('all');
     const navigate = useNavigate();
+    const [isLiffReady, setIsLiffReady] = useState(false);
+
+    // LIFF初期化
+    useEffect(() => {
+        const initLiff = async () => {
+            try {
+                await liff.init({ liffId: '2009587376-RxyE3qYl' });
+                setIsLiffReady(true);
+                console.log('LIFF initialized successfully.');
+            } catch (err) {
+                console.error('LIFF initialization failed', err);
+            }
+        };
+        initLiff();
+    }, []);
 
     // 1. メニューデータ
     const menus = [
@@ -122,8 +138,7 @@ const Reservation = () => {
 ご来店をお待ちしております！`;
 
         try {
-            const liff = (await import('@line/liff')).default;
-            if (liff && typeof liff.isLoggedIn === 'function' && liff.isLoggedIn()) {
+            if (isLiffReady && liff.isLoggedIn()) {
                 await liff.sendMessages([
                     {
                         type: 'text',
@@ -131,7 +146,7 @@ const Reservation = () => {
                     }
                 ]);
             } else {
-                console.log("LIFF is not logged in. Simulated LINE message:\n", message);
+                console.log("LIFF is not logged in / ready. Simulated message:\n", message);
             }
         } catch (e) {
             console.error('LIFF Message Error: ', e);
